@@ -1,0 +1,23 @@
+name: bazel-build-test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-runner:
+    runs-on: ubuntu-22.04-16core
+    container:
+      image: python:3.12-bookworm
+      options: --user 1001:128
+      volumes:
+        - /etc/passwd:/etc/passwd
+        - /etc/group:/etc/group
+    steps:
+      - name: 'build grpc'
+        run: |
+          curl -Lo /tmp/bazel https://github.com/bazelbuild/bazel/releases/download/8.0.1/bazel-8.0.1-linux-x86_64
+          chmod 755 /tmp/bazel
+          curl -fSsL https://github.com/grpc/grpc/archive/refs/tags/v1.71.0.tar.gz | tar -zxf -
+          cd grpc-1.71.0
+          export CC=/usr/bin/cc
+          /tmp/bazel build :all
